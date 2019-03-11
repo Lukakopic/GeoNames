@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace geoNames
 {
-    public static class Class1
+    public static class LoadAllSheets
     {
         public static List<Adresa> GenerateFromXLS(string fileName)
         {
@@ -18,29 +19,35 @@ namespace geoNames
             using (var pck = new ExcelPackage(fi))
             {
                 var workbook = pck.Workbook;
-                var worksheet = workbook.Worksheets.First();
+                foreach (var worksheet in pck.Workbook.Worksheets)
+                { 
 
                 var newcollection = worksheet.ConvertSheetToObjects<TestObject>();
                 //newcollection.ToList().ForEach(to => Console.WriteLine("{{ Col1:{0}, Col2: {1}, Col3: \"{2}\", Col4: {3} }}", to.ADDRESS_ID, to.ADDRESS_STRING, to.LAT, to.LON));
                 foreach (var item in newcollection.ToList())
                 {
-                    if(item.ADDRESS_ID.Equals("ADDRESS_ID"))
+                    //if(item.ADDRESS_ID.Equals("ADDRESS_ID"))
+                    //{
+                    //    continue;
+                    //}
+                    var oneAdress = new Adresa()
                     {
-                        continue;
-                    }
-                    var oneAdress = new Adresa() {
                         geonameid = item.ADDRESS_ID,
                         name = item.ADDRESS_STRING,
                         asciiname = item.ADDRESS_STRING,
                         alternatenames = item.ADDRESS_STRING,
                         longitude = item.LON,
                         latitude = item.LAT
-                        
+
                     };
                     retval.Add(oneAdress);
                 }
+                    
+                
+                }
+                return retval;
             }
-            return retval;
+            
         }
         private static IEnumerable<T> ConvertSheetToObjects<T>(this ExcelWorksheet worksheet) where T : new()
         {
@@ -74,13 +81,13 @@ namespace geoNames
             var types = groups
                 .Skip(1)
                 .First()
-                .Select(rcell => rcell.Value.GetType())
+                .Select(rcell => rcell.Value?.GetType())
                 .ToList();
 
             //Assume first row has the column names
             var colnames = groups
                 .First()
-                .Select((hcell, idx) => new { Name = hcell.Value.ToString(), index = idx })
+                .Select((hcell, idx) => new { Name = hcell.Value?.ToString(), index = idx })
                 .Where(o => tprops.Select(p => p.Name).Contains(o.Name))
                 .ToList();
 
@@ -116,8 +123,8 @@ namespace geoNames
                             else if (prop.PropertyType == typeof(DateTime))
                                 prop.SetValue(tnew, convertDateTime(unboxedVal));
                             else
-                                prop.SetValue(tnew,"");
-                           // throw new NotImplementedException(String.Format("Type '{0}' not implemented yet!", prop.PropertyType.Name));
+                                prop.SetValue(tnew, Convert.ToString(val));
+                            // throw new NotImplementedException(String.Format("Type '{0}' not implemented yet!", prop.PropertyType.Name));
                         }
                         else
                         {

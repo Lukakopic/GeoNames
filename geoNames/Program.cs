@@ -14,8 +14,9 @@ namespace geoNames
         {
             // var fileName = @"D:\adreses.txt";
             //GenerateFromTXT(fileName);
-            var fileName = @"D:\GitProjekti\GeoNames\ADDRESSES_COPY.xlsx";
-            printToFile(Class1.GenerateFromXLS(fileName));
+            var fileName = @"D:\GitProjekti\GeoNames\ADDRESSES_COPY – kopija.xlsx";
+            printToFile(LoadOneSheet.GenerateFromXLS(fileName));
+            //printToFile(LoadAllSheets.GenerateFromXLS(fileName));
         }
 
         private static void printToFile(List<Adresa> inputData)
